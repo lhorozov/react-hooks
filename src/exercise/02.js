@@ -11,12 +11,23 @@ export const useLocalStorageState = (
   const [value, setValue] = React.useState(() => {
     const valueInLocalStorage = window.localStorage.getItem(key)
     if (valueInLocalStorage) {
-      return deserialize(valueInLocalStorage)
+      try {
+        return deserialize(valueInLocalStorage)
+      } catch (error) {
+        window.localStorage.removeItem(key)
+      }
     }
-    return initialValue
+    return typeof initialValue === 'function' ? initialValue() : initialValue
   })
 
+  const prevKeyRef = React.useRef(key)
+
   React.useEffect(() => {
+    const prevKey = prevKeyRef.current
+    if (prevKey !== key) {
+      window.localStorage.removeItem(prevKey)
+    }
+    prevKeyRef.current = key
     window.localStorage.setItem(key, serialize(value))
   }, [key, value, serialize])
 
@@ -33,7 +44,7 @@ function Greeting({initialName = ''}) {
     <div>
       <form>
         <label value={value} htmlFor="name">
-          Name:{' '}
+          Name:
         </label>
         <input value={value} onChange={handleChange} id="name" />
       </form>
