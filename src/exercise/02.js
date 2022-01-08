@@ -3,13 +3,17 @@
 
 import * as React from 'react'
 
-export const useLocalStorageState = (key, initialValue) => {
-  const [value, setValue] = React.useState(
-    () => window.localStorage.getItem(key) ?? initialValue,
-  )
+export const useLocalStorageState = (key, initialValue = '') => {
+  const [value, setValue] = React.useState(() => {
+    const valueInLocalStorage = window.localStorage.getItem(key)
+    if (valueInLocalStorage) {
+      return JSON.parse(valueInLocalStorage)
+    }
+    return initialValue
+  })
 
   React.useEffect(() => {
-    window.localStorage.setItem(key, value)
+    window.localStorage.setItem(key, JSON.stringify(value))
   }, [key, value])
 
   return [value, setValue]
