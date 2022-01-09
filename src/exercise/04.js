@@ -4,7 +4,14 @@
 import * as React from 'react'
 
 function Board() {
-  const [squares, setSquares] = React.useState(() => Array(9).fill(null))
+  const [squares, setSquares] = React.useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('tictactoe'))
+    } catch (error) {
+      localStorage.removeItem('tictactoe')
+    }
+    return Array(9).fill(null)
+  })
 
   const nextValue = calculateNextValue(squares)
   const winner = calculateWinner(squares)
@@ -17,10 +24,13 @@ function Board() {
     const squaresCopy = [...squares]
     squaresCopy[square] = nextValue
     setSquares(squaresCopy)
+    localStorage.setItem('tictactoe', JSON.stringify(squaresCopy))
   }
 
   function restart() {
-    setSquares(Array(9).fill(null))
+    const emptyBoard = Array(9).fill(null)
+    setSquares(emptyBoard)
+    localStorage.setItem('tictactoe', JSON.stringify(emptyBoard))
   }
 
   function renderSquare(i) {
