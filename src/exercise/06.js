@@ -21,24 +21,24 @@ function PokemonInfo({pokemonName}) {
     }
   }, [pokemonName])
 
-  if (state.error) {
-    return (
-      <div role="alert">
-        There was an error:
-        <pre style={{whiteSpace: 'normal'}}>{state.error.message}</pre>
-      </div>
-    )
-  }
-
-  if (state.status === 'resolved') {
-    return <PokemonDataView pokemon={state.pokemon} />
-  } else if (state.status === 'idle') {
+  if (state.status === 'idle') {
     return 'Submit a pokemon'
-  } else if (state.status === 'resolved') {
-    return <PokemonDataView pokemon={state.pokemon} />
   } else if (state.status === 'pending') {
     return <PokemonInfoFallback name={pokemonName} />
+  } else if (state.status === 'resolved') {
+    return <PokemonDataView pokemon={state.pokemon} />
+  } else if (state.status === 'rejected') {
+    throw new Error(state.error.message)
   }
+}
+
+const ErrorFallback = ({error}) => {
+  return (
+    <div role="alert">
+      There was an error:
+      <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
+    </div>
+  )
 }
 
 function App() {
@@ -53,10 +53,31 @@ function App() {
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
       <div className="pokemon-info">
-        <PokemonInfo pokemonName={pokemonName} />
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <PokemonInfo pokemonName={pokemonName} />
+        </ErrorBoundary>
       </div>
     </div>
   )
 }
 
 export default App
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {error: null}
+  }
+
+  static getDerivedStateFromError(error) {
+    return {error}
+  }
+
+  render() {
+    const {error} = this.state
+    if (this.state.error) {
+      return <this.props.FallbackComponent error={error} />
+    }
+    return this.props.children
+  }
+}
