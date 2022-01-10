@@ -23,20 +23,24 @@ function PokemonInfo({pokemonName}) {
     }
   }, [pokemonName])
 
-  return error ? (
-    <div role="alert">
-      There was an error:
-      <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
-    </div>
-  ) : pokemonName ? (
-    pokemon ? (
-      <PokemonDataView pokemon={pokemon} />
-    ) : (
-      <PokemonInfoFallback name={pokemonName} />
+  if (error) {
+    return (
+      <div role="alert">
+        There was an error:
+        <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
+      </div>
     )
-  ) : (
-    'Submit a pokemon'
-  )
+  }
+
+  if (pokemonName) {
+    if (pokemon) {
+      return <PokemonDataView pokemon={pokemon} />
+    } else {
+      return <PokemonInfoFallback name={pokemonName} />
+    }
+  } else {
+    return 'Submit a pokemon'
+  }
 }
 
 function App() {
